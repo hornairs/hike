@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require 'pathname'
 
 module Hike
@@ -129,7 +131,11 @@ module Hike
         matches = entries(dirname)
 
         pattern = pattern_for(basename)
-        matches = matches.select { |m| m.to_s =~ pattern }
+        matches = matches.select do |m|
+          m = m.to_s
+          m.force_encoding("UTF-8").encode!
+          m.to_s =~ pattern
+        end
 
         sort_matches(matches, basename).each do |path|
           pathname = dirname.join(path)
@@ -171,7 +177,8 @@ module Hike
         end
 
         extension_pattern = extensions.map { |e| Regexp.escape(e) }.join("|")
-        /^#{basename_re}(?:#{extension_pattern})*$/
+
+        Regexp.new("^#{basename_re}(?:#{extension_pattern})*$".encode("UTF-8"))
       end
 
       # Sorts candidate matches by their extension
